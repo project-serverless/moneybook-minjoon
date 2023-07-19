@@ -33,7 +33,6 @@ def upload_file(file_name, bucket, object_name=None):
         return False
     return True
 
-
 CSV_FILE = 'moneybook.csv'
 
 #데이터 입력 함수   
