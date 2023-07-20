@@ -1,4 +1,0 @@
-# moneybook-minjoon
-
-
-

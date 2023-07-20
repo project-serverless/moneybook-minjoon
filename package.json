@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "@aws-cdk/aws-lambda-python-alpha": "^2.87.0-alpha.0"
-  },
-  "devDependencies": {
-    "@types/source-map-support": "^0.5.6"
-  }
-}
