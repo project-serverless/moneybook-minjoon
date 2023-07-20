@@ -8,7 +8,7 @@ export interface Account {
 export const Accounts: Account[] = [
     {
         accountId: '343102482966',
-        stage: 'nninjo-on\samsung',
+        stage: 'nninjo-on',
         region: 'ap-northeast-2',
         airportCode: 'ICN',
     },
