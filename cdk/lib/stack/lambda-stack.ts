@@ -29,7 +29,7 @@ export class MoneybookLambdaStack extends cdk.Stack {
         //
         new PythonFunction(this, `${SYSTEM_NAME}-create-file`, {
             functionName: `${getAccountUniqueName(props.context)}-create-file`,
-            entry: path.join(__dirname, '../../../app/backend/create-file'),
+            entry: path.join(__dirname, '../../../app/backend'),
             index: 'create_file.py',
             runtime: Runtime.PYTHON_3_10,
             role: lambdaRole,
