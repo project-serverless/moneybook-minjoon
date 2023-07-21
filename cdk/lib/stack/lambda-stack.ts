@@ -37,5 +37,49 @@ export class MoneybookLambdaStack extends cdk.Stack {
                 'BUCKET_NAME': props.s3Stack!.bucket.bucketName,
             }
         })
+
+        new PythonFunction(this, `${SYSTEM_NAME}-create-csv`, {
+            functionName: `${getAccountUniqueName(props.context)}-create-csv`,
+            entry: path.join(__dirname, '../../../app/backend/c_csv'),
+            index: 'c_csv.py',
+            runtime: Runtime.PYTHON_3_10,
+            role: lambdaRole,
+            environment: {
+                'BUCKET_NAME': props.s3Stack!.bucket.bucketName,
+            }
+        })
+
+        new PythonFunction(this, `${SYSTEM_NAME}-read-csv`, {
+            functionName: `${getAccountUniqueName(props.context)}-read-csv`,
+            entry: path.join(__dirname, '../../../app/backend/r_csv'),
+            index: 'r_csv.py',
+            runtime: Runtime.PYTHON_3_10,
+            role: lambdaRole,
+            environment: {
+                'BUCKET_NAME': props.s3Stack!.bucket.bucketName,
+            }
+        })
+
+        new PythonFunction(this, `${SYSTEM_NAME}-update-csv`, {
+            functionName: `${getAccountUniqueName(props.context)}-update-csv`,
+            entry: path.join(__dirname, '../../../app/backend/u_csv'),
+            index: 'u_csv.py',
+            runtime: Runtime.PYTHON_3_10,
+            role: lambdaRole,
+            environment: {
+                'BUCKET_NAME': props.s3Stack!.bucket.bucketName,
+            }
+        })
+
+        new PythonFunction(this, `${SYSTEM_NAME}-delete-csv`, {
+            functionName: `${getAccountUniqueName(props.context)}-delete-csv`,
+            entry: path.join(__dirname, '../../../app/backend/d_csv'),
+            index: 'd_csv.py',
+            runtime: Runtime.PYTHON_3_10,
+            role: lambdaRole,
+            environment: {
+                'BUCKET_NAME': props.s3Stack!.bucket.bucketName,
+            }
+        })
     }
 }
