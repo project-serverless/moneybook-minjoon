@@ -1,50 +1,36 @@
 import boto3
 import os
-import logging
+import io
 import pandas as pd
 
 bucket_name = 'samsung-icn-moneybook-bucket'  # S3 버킷 이름
 csv_file_name = 'moneybook.csv'  # 가져올 파일 이름
 
-#버킷으로 부터 파일 저장
-def download_file_from_s3(bucket_name, s3_key):
-    s3_client = boto3.client('s3')
-    s3_client.download_file(bucket_name, s3_key, csv_file_name)
-
-#버킷으로 파일 업로드
-def upload_file(file_name, bucket, object_name=None):
-    """Upload a file to an S3 bucket
-
-    :param file_name: File to upload
-    :param bucket: Bucket to upload to
-    :param object_name: S3 object name. If not specified then file_name is used
-    :return: True if file was uploaded, else False
-    """
-
-    # If S3 object_name was not specified, use file_name
-    if object_name is None:
-        object_name = os.path.basename(file_name)
-
-    # Upload the file
-    s3_client = boto3.client('s3')
-    try:
-        response = s3_client.upload_file(file_name, bucket, object_name)
-    except ClientError as e:
-        logging.error(e)
-        return False
-    return True
-
 def lambda_handler(event, context):
-    #버킷으로 부터 파일 저장
-    download_file_from_s3(bucket_name,csv_file_name)
 
+    #삭제할 인덱스 데이터 가져오기
     delete_index = event['delete_index']
-    data = pd.read_csv(csv_file_name,encoding= 'utf-8')
+
+    #s3 버킷에서 csv 데이터 가져오기
+    s3_client = boto3.client("s3")
+    response = s3_client.get_object(Bucket=bucket_name,Key=csv_file_name)
+    csv_data = response["Body"].read().decode("utf-8")
+
+    #csv 데이터를 데이터프레임으로 변환
+    data = pd.read_csv(io.StringIO(csv_data))
+    
+    #해당 인덱스 삭제
     data.drop(delete_index-1,inplace=True)
-    data.to_csv(csv_file_name, index=False, encoding='utf-8')
     
-    upload_file(csv_file_name, bucket_name, csv_file_name)
+    #csv 데이터로 변환
+    csv_data = data.to_csv(index=False, encoding='utf-8')
     
-    return data
+    #s3 버켓에 파일 덮어쓰기
+    s3_client.put_object(Bucket = bucket_name, Key=csv_file_name,Body=csv_data)
+ 
+    return {
+        "statusCode": 200,
+        "body": "데이터가 성공적으로 삭제되었습니다."
+    }
 
 
