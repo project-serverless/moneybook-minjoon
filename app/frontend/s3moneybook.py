@@ -10,7 +10,7 @@ import pandas as pd
 #조회 함수  
 
 def json_pandas():
-    json_data = read__csv()
+    json_data = json.loads(read__csv())
     data = pd.read_json(json_data)
     return data
  
@@ -86,13 +86,13 @@ with gr.Blocks() as moneyBook:
         delete_button = gr.Button("삭제")
         modify_inputs = [ 
                 gr.Number(label="modify_index"),
-                gr.Dropdown(choices=["Category","목적","금액","Meno"],label="changes"),
+                gr.Dropdown(choices=["Category","Purpose","Amount","Memo"],label="changes"),
                 gr.Textbox(label="modify_data")
         ]
         modify_button = gr.Button("수정")  
        
     record_button.click(create_csv, inputs=text_input, outputs=[])
-    print_button.click(read__csv, inputs=[], outputs=print_output)
+    print_button.click(json_pandas, inputs=[], outputs=print_output)
     modify_button.click(update_csv,inputs=modify_inputs,outputs=print_output)
     delete_button.click(delete_csv,inputs=delete_inputs,outputs=print_output)
     
