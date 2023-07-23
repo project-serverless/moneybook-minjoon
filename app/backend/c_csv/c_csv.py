@@ -11,7 +11,7 @@ def lambda_handler(event, context):
 
     #받아온 데이터
     data = {
-        'Date': [datetime.datetime.now().strftime('%Y-%m-%d')],
+        'Date': [datetime.datetime.now().strftime('%Y년 %m월 %d일 %H시 %M분%S초')],
         'Category': [event.get('Category', '')],
         'Purpose': [event.get('Purpose', '')],
         'Amount': [event.get('Amount', 0)],
