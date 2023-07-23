@@ -18,7 +18,7 @@ def lambda_handler(event, context):
 
     #csv 데이터를 데이터프레임으로 변환
     data = pd.read_csv(io.StringIO(csv_data))
-    
+
     #해당 인덱스 삭제
     data.drop(delete_index-1,inplace=True)
     
@@ -28,9 +28,6 @@ def lambda_handler(event, context):
     #s3 버켓에 파일 덮어쓰기
     s3_client.put_object(Bucket = bucket_name, Key=csv_file_name,Body=csv_data)
  
-    return {
-        "statusCode": 200,
-        "body": "데이터가 성공적으로 삭제되었습니다."
-    }
+    return data.to_json(orient='records')
 
 
