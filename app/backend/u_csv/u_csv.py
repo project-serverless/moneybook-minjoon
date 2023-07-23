@@ -1,8 +1,6 @@
 import boto3
-import os
 import io
 import pandas as pd
-import csv
 
 bucket_name = 'samsung-icn-moneybook-bucket'  # S3 버킷 이름
 csv_file_name = 'moneybook.csv'  # 가져올 파일 이름
@@ -21,12 +19,14 @@ def lambda_handler(event, context):
 
     #csv 데이터를 데이터프레임으로 변환
     data = pd.read_csv(io.StringIO(csv_data))
-
+    
     idx= int(modify_index-1)
 
     #원하는 데이터 수정
-    if changes=="금액":
+    if changes=="amount":
         data.loc[idx,changes] = int(modify_data)
+    elif changes=="Category":
+        data.loc[idx, changes] = "지출" if data.loc[idx, changes] == "수입" else "수입"
     else:
         data.loc[idx,changes] = modify_data
     
@@ -36,8 +36,5 @@ def lambda_handler(event, context):
     #s3 버켓에 파일 덮어쓰기
     s3_client.put_object(Bucket = bucket_name, Key=csv_file_name,Body=csv_data)
 
-    return {
-        "statusCode": 200,
-        "body": "데이터가 성공적으로 수정되었습니다."
-    }
+    return data.to_json(orient='records')
 
