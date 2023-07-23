@@ -7,13 +7,27 @@ import boto3
 import gradio as gr
 import pandas as pd
 
-#조회 함수  
+#입력 함수
+def create_csv(category,purpose,amount=0,memo=""):
+    lambda_client = boto3.client('lambda')
+    lambda_client.invoke(FunctionName='SAMSUNG-ICN-create-csv',
+                        InvocationType='RequestResponse',
+                        Payload=json.dumps({
+                            "Category" : category,
+                            "Purpose" : purpose,
+                            "Amount" : amount,
+                            "Memo" : memo
+                        })
+                    )
+    return True
 
+#json 형식의 문자열을 pandas dataFrame으로 변환
 def json_pandas(json_string):
     json_data = json.loads(json_string)
     data = pd.read_json(json_data)
     return data
- 
+
+#조회 함수
 def read__csv():
     lambda_client = boto3.client('lambda')
     response = lambda_client.invoke(FunctionName= 'SAMSUNG-ICN-read-csv',
@@ -24,7 +38,6 @@ def read__csv():
     if response['StatusCode'] == 200:
         # Lambda 함수의 응답 데이터를 JSON으로 파싱하여 반환.
         data_json = response['Payload'].read().decode('utf-8')
-        print(data_json)
         return json_pandas(data_json)
     else:
         print("Lambda 함수 호출에 실패했습니다!")
@@ -42,7 +55,6 @@ def delete_csv(delete_index):
     if response['StatusCode'] == 200:
         # Lambda 함수의 응답 데이터를 JSON으로 파싱하여 반환.
         data_json = response['Payload'].read().decode('utf-8')
-        print(data_json)
         return json_pandas(data_json)
     else:
         print("Lambda 함수 호출에 실패했습니다!")
@@ -62,26 +74,14 @@ def update_csv(modify_index,changes,modify_data):
     if response['StatusCode'] == 200:
         # Lambda 함수의 응답 데이터를 JSON으로 파싱하여 반환.
         data_json = response['Payload'].read().decode('utf-8')
-        print(data_json)
         return json_pandas(data_json)
     else:
         print("Lambda 함수 호출에 실패했습니다!")
         return None
     
-def create_csv(category,purpose,amount=0,memo=""):
-    lambda_client = boto3.client('lambda')
-    lambda_client.invoke(FunctionName='SAMSUNG-ICN-create-csv',
-                        InvocationType='RequestResponse',
-                        Payload=json.dumps({
-                            "Category" : category,
-                            "Purpose" : purpose,
-                            "Amount" : amount,
-                            "Memo" : memo
-                        })
-                    )
-    return True
 
-#출력 함수
+
+#홈페이지 탭
 with gr.Blocks() as moneyBook:
     gr.Markdown("가계부 어플리케이션")
     with gr.Tab("입력"):
@@ -105,9 +105,11 @@ with gr.Blocks() as moneyBook:
         ]
         update_button = gr.Button("수정")  
        
+    #버튼 목록
     create_button.click(create_csv, inputs=create_input, outputs=[])
     read_button.click(read__csv, inputs=[], outputs=read_output)
     update_button.click(update_csv,inputs=update_inputs,outputs=read_output)
     delete_button.click(delete_csv,inputs=delete_inputs,outputs=read_output)
-    
+
+#인터페이스 실행
 moneyBook.launch()
