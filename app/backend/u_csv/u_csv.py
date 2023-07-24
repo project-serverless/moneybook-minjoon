@@ -1,6 +1,6 @@
 import boto3
-import io
-import pandas as pd
+from boto3.dynamodb.conditions import Key
+
 
 bucket_name = 'samsung-icn-moneybook-bucket'  # S3 버킷 이름
 csv_file_name = 'moneybook.csv'  # 가져올 파일 이름
@@ -8,33 +8,47 @@ csv_file_name = 'moneybook.csv'  # 가져올 파일 이름
 def lambda_handler(event, context):
 
     #변경할 데이터 가져오기
-    modify_index = event['modify_index']
-    changes = event['changes']
-    modify_data = event['modify_data']
+    user = event['User']
+    date = event['Date']
+    changes = event['Changes']
+    update_data = event['Update_data']
 
-    #s3 버킷에서 csv 데이터 가져오기
-    s3_client = boto3.client("s3")
-    response = s3_client.get_object(Bucket=bucket_name,Key=csv_file_name)
-    csv_data = response["Body"].read().decode("utf-8")
+    if changes =="Category":
+        update_data = "지출" if update_data == "수입" else "지출"
 
-    #csv 데이터를 데이터프레임으로 변환
-    data = pd.read_csv(io.StringIO(csv_data))
+    # 업데이트할 데이터 정보
+    update_expression = f"SET {changes} = :value"
+    expression_attribute_values = {
+        ':value': update_data  # 업데이트할 값
+    }
+
+    # AWS SDK 클라이언트 생성
+    dynamodb = boto3.resource('dynamodb')
     
-    idx= int(modify_index-1)
-
-    #원하는 데이터 수정
-    if changes=="amount":
-        data.loc[idx,changes] = int(modify_data)
-    elif changes=="Category":
-        data.loc[idx, changes] = "지출" if data.loc[idx, changes] == "수입" else "수입"
-    else:
-        data.loc[idx,changes] = modify_data
+    # DynamoDB 테이블 정보
+    table = dynamodb.Table('Moneybook')
     
-    #csv 데이터로 변환
-    csv_data = data.to_csv(index=False, encoding='utf-8')
+    try:
+        response = table.update_item(
+            Key={
+                'User' : user,
+                'Date' : date
+            },
+            UpdateExpression=update_expression,
+            ExpressionAttributeValues=expression_attribute_values,
+            ReturnValues='UPDATED_NEW'
+        )
+
+    except Exception as e:
+        # 업데이트 실패시 예외 처리
+        response = table.query(KeyConditionExpression=Key('User').eq(user))
+        items = response['Items']
+        return {
+            'statusCode': 500,
+            'body': str(e)
+        }
     
-    #s3 버켓에 파일 덮어쓰기
-    s3_client.put_object(Bucket = bucket_name, Key=csv_file_name,Body=csv_data)
-
-    return data.to_json(orient='records')
-
+    else :
+        response = table.query(KeyConditionExpression=Key('User').eq(user))
+        items = response['Items']
+        return items
