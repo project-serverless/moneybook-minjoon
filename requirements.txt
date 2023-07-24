@@ -1,0 +1,4 @@
+python==3.11.0
+gradio==3.36.1
+boto3==1.28.4
+pandas==2.0.3
