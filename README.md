@@ -9,7 +9,7 @@ with Annotation AI
 # Example of Execution
 
 **CREATE**
-![update](https://github.com/project-serverless/moneybook-minjoon/assets/103498687/b1fc7617-2039-42dd-9ab9-90c5a53b8c81)
+![create](https://github.com/project-serverless/moneybook-minjoon/assets/103498687/a0940826-ef8e-43db-af6f-dad5f32111b9)
 
 **READ**
 ![read](https://github.com/project-serverless/moneybook-minjoon/assets/103498687/1461b14e-f668-4331-a767-0acbfea292bc)
